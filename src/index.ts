@@ -75,4 +75,35 @@ app.post('/api/v1/ingest/research-paper', zValidator('json', paperIngestSchema),
   }
 })
 
+// 5. High-Performance Read Endpoint (For Next.js Frontend)
+app.get('/api/v1/research-papers', async (c) => {
+  const prisma = c.var.prisma
+  
+  try {
+    // Fetch the latest 50 papers from the Neon cloud database
+    const papers = await prisma.paper.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        paperUrl: true,
+        projectUrl: true,
+        citationCount: true,
+        createdAt: true
+      }
+    })
+
+    return c.json({
+      status: "success",
+      count: papers.length,
+      data: papers
+    }, 200)
+    
+  } catch (error: any) {
+    return c.json({ status: "error", detail: error.message }, 500)
+  }
+})
+
 export default app
