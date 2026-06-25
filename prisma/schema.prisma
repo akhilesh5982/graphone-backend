@@ -34,6 +34,9 @@ model Paper {
   methods    PaperMethod[]
   sotaClaims SotaClaim[]
   rankings   Ranking[]
+  authors         PaperAuthor[]
+  models          PaperModel[]
+  datasets        PaperDataset[]
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime? @updatedAt @map("updated_at")
 
@@ -141,4 +144,73 @@ model Ranking {
   @@unique([paper_id, benchmark_id])
   @@index([benchmark_id, rank])
   @@map("rankings")
+}
+
+// --- AUTHORS ---
+model Author {
+  id        String        @id @default(uuid())
+  name      String
+  slug      String        @unique
+  papers    PaperAuthor[]
+  
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@map("authors")
+}
+
+model PaperAuthor {
+  paper_id  String
+  author_id String
+  paper     Paper   @relation(fields: [paper_id], references: [id], onDelete: Cascade)
+  author    Author  @relation(fields: [author_id], references: [id], onDelete: Cascade)
+
+  @@id([paper_id, author_id])
+  @@map("paper_authors")
+}
+
+// --- AI MODELS ---
+model Model {
+  id        String       @id @default(uuid())
+  name      String
+  slug      String       @unique
+  papers    PaperModel[]
+  
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@map("models")
+}
+
+model PaperModel {
+  paper_id  String
+  model_id  String
+  paper     Paper   @relation(fields: [paper_id], references: [id], onDelete: Cascade)
+  model     Model   @relation(fields: [model_id], references: [id], onDelete: Cascade)
+
+  @@id([paper_id, model_id])
+  @@map("paper_models")
+}
+
+// --- DATASETS ---
+model Dataset {
+  id        String         @id @default(uuid())
+  name      String
+  slug      String         @unique
+  papers    PaperDataset[]
+  
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@map("datasets")
+}
+
+model PaperDataset {
+  paper_id   String
+  dataset_id String
+  paper      Paper   @relation(fields: [paper_id], references: [id], onDelete: Cascade)
+  dataset    Dataset @relation(fields: [dataset_id], references: [id], onDelete: Cascade)
+
+  @@id([paper_id, dataset_id])
+  @@map("paper_datasets")
 }
